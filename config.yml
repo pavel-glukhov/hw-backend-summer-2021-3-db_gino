@@ -1,18 +1,18 @@
-user_token: NmE0YzRjMzEtNTM2Zi00NDY5LThmNzItZTE1YmE2MTZkNGE4XzMw
+user_token: NmE0YzRjMzEtNTM2Zi00NDY5LThmNzItZTE1YmE2MTZkNGE4XzgwNg==
 
 session:
-  key: t8BAvb1SagRDW86gv7TR4GVYvFIcbctqMkbsFmlDoLM=
+  key: ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=
 admin:
   email: admin@admin.com
   password: admin
 database:
   host: 0.0.0.0
   port: 5432
-  user: kts_hw
-  password: kts
-  database: kts_hw_db
+  user: postgres
+  password: postgres
+  database: postgres
 bot:
-  token: 71537a16b313e2356b4fc47241558c813f25c22468524fad590a288c24713410349ea3603e95395a13a5c
-  group_id: 202369435
+  token: 8d37c34433c44321a0213cc1bb6a4091590c516c044131c98257ea1585d0a706460833891fcb556d31b0c
+  group_id: 210547650
 
 
