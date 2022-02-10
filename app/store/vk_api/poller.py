@@ -17,7 +17,7 @@ class Poller:
 
     async def stop(self):
         self.is_running = False
-        await self.poll_task
+        self.poll_task.cancel()
 
     async def poll(self):
         while self.is_running:

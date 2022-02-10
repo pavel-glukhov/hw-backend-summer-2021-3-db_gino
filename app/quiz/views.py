@@ -1,5 +1,6 @@
 from aiohttp.web_exceptions import HTTPConflict, HTTPNotFound, HTTPBadRequest
 from aiohttp_apispec import request_schema, response_schema, querystring_schema
+from asyncpg import UniqueViolationError, ForeignKeyViolationError
 
 from app.quiz.models import Answer
 from app.quiz.schemes import (
@@ -19,10 +20,11 @@ class ThemeAddView(AuthRequiredMixin, View):
     @response_schema(ThemeSchema)
     async def post(self):
         title = self.data["title"]
-        existing_theme = await self.store.quizzes.get_theme_by_title(title)
-        if existing_theme:
+        try:
+            theme = await self.store.quizzes.create_theme(title=title)
+        except UniqueViolationError:
             raise HTTPConflict
-        theme = await self.store.quizzes.create_theme(title=title)
+
         return json_response(data=ThemeSchema().dump(theme))
 
 
@@ -38,35 +40,24 @@ class QuestionAddView(AuthRequiredMixin, View):
     @response_schema(QuestionSchema)
     async def post(self):
         title = self.data["title"]
-        existing_question = await self.store.quizzes.get_question_by_title(title)
-        if existing_question:
-            raise HTTPConflict
-
         theme_id = self.data["theme_id"]
-        theme = await self.store.quizzes.get_theme_by_id(id_=theme_id)
-        if not theme:
+
+        try:
+            question = await self.store.quizzes.create_question(
+                    title=title,
+                    theme_id=theme_id,
+                    answers=[
+                        Answer(
+                            title=answer["title"],
+                            is_correct=answer["is_correct"],
+                        ) for answer in self.data['answers']
+                    ],
+                )
+        except UniqueViolationError:
+            raise HTTPConflict
+        except ForeignKeyViolationError:
             raise HTTPNotFound
 
-        if len(self.data["answers"]) < 2:
-            raise HTTPBadRequest
-
-        parsed_answers = []
-        correct = []
-        for answer in self.data["answers"]:
-            answer = Answer(title=answer["title"], is_correct=answer["is_correct"])
-            if answer.is_correct and True in correct:
-                raise HTTPBadRequest
-            correct.append(answer.is_correct)
-            parsed_answers.append(answer)
-
-        if not any(correct):
-            raise HTTPBadRequest
-
-        question = await self.store.quizzes.create_question(
-            title=title,
-            theme_id=theme_id,
-            answers=parsed_answers,
-        )
         return json_response(data=QuestionSchema().dump(question))
 
 
